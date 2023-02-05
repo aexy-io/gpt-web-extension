@@ -1,8 +1,13 @@
 // import { QueryHandler } from "@src/components/api";
-import { getAllPublicTemplatesQuery } from "@src/components/api/queries/templates";
+import {
+    getAllPublicTemplatesQuery,
+    runPrompt,
+    validateSettings,
+} from "@src/components/api/queries/templates";
 import * as React from "react";
 
 import { useQuery } from "graphql-hooks";
+import Browser from "webextension-polyfill";
 
 const getErrorStyle = (name: string, errorValues: any) => {
     return errorValues && errorValues[name] ? { borderColor: "red" } : null;
@@ -27,12 +32,10 @@ const RunTemplate = (template: any) => {
     >([]);
 
     React.useEffect(() => {
-        if (template) {
-            const { metadata } = template;
-            console.info("metadata", metadata);
-            setVariables([...metadata?.variables]);
+        if (template?.template?.metadata?.variables) {
+            setVariables(template?.template?.metadata?.variables);
         }
-    }, [template]);
+    }, [template?.metadata?.variables]);
 
     const [errorValues, setErrorValues] = React.useState({});
     const validateForm = () => {
@@ -51,7 +54,6 @@ const RunTemplate = (template: any) => {
 
     const handleFormChange = (index: any, event: any) => {
         const data = [...variables];
-        console.log(index, event.target, data[index]);
         if (event.target.value) {
             const errors: any = { ...errorValues };
             delete errors[`variables${index}`];
@@ -64,25 +66,19 @@ const RunTemplate = (template: any) => {
             <div className="w-full px-3 mb-6 md:mb-0 h-22 mt-5 ">
                 {variables.map((e, index) => {
                     const { placeholder, examples } = e;
-                    console.info(e);
-
                     return (
                         <div key={index}>
-                            <label
-                                className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1"
-                                id="grid-city"
-                            >
+                            <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
                                 {` ${index + 1}: ${placeholder}`}
                             </label>
                             <div
                                 className="appearance-none w-full inline-block mx-3"
                                 style={{
-                                    width: "calc(30% - 8px)",
+                                    width: "90%",
                                 }}
                             >
                                 <input
                                     className="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
-                                    id="grid-city"
                                     type="text"
                                     name="value"
                                     // style={getErrorStyle(
@@ -113,8 +109,23 @@ const RunTemplate = (template: any) => {
                     onClick={async (e) => {
                         e.preventDefault();
                         if (validateForm()) {
-                            // console.log("running prompt");
-                            // await runPrompt();
+                            console.log("running prompt");
+                            const { error, fields, keys } =
+                                await validateSettings();
+                            if (error) {
+                                await Browser.notifications.create({
+                                    type: "basic",
+                                    iconUrl: "favicon-16x16.png",
+                                    title: "Missing Settings",
+                                    message: error,
+                                });
+                                return window.alert(error);
+                            }
+                            await runPrompt(
+                                variables,
+                                template?.template?.id,
+                                keys,
+                            );
                         }
                     }}
                 >
@@ -134,8 +145,160 @@ const RunTemplate = (template: any) => {
     );
 };
 
+export const SettingsTab = () => {
+    const [errorValues, setErrorValues] = React.useState({});
+    const [settingValues, setSettingValues] = React.useState({
+        bromoKey: "",
+        openAIKey: "",
+        openAIOrg: "",
+    });
+
+    const getSettingValues = async () => {
+        const bromoKey = await Browser.storage.local.get("bromoKey");
+        const openAIKey = await Browser.storage.local.get("openAIKey");
+        const openAIOrg = await Browser.storage.local.get("openAIOrg");
+        const settings = {
+            bromoKey: bromoKey?.bromoKey,
+            openAIKey: openAIKey?.openAIKey,
+            openAIOrg: openAIOrg?.openAIOrg,
+        };
+        setSettingValues(settings);
+    };
+
+    React.useEffect(() => {
+        getSettingValues();
+    }, []);
+
+    const handleFormChange = (name: string, event: any) => {
+        if (event.target.value) {
+            const errors: any = { ...errorValues };
+            delete errors[name];
+            setSettingValues(
+                Object.assign({}, settingValues, {
+                    [name]: event.target.value,
+                }),
+            );
+            Browser.storage.local.set({ [name]: event.target.value });
+        }
+    };
+
+    return (
+        <div>
+            <div className="w-full px-3 mb-6 md:mb-0 h-22 mt-5 ">
+                <div>
+                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
+                        Bromo API Key
+                    </label>
+                    <div
+                        className="appearance-none w-full inline-block mx-3"
+                        style={{
+                            width: "90%",
+                        }}
+                    >
+                        <input
+                            className="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
+                            type="text"
+                            name="bromoKey"
+                            // style={getErrorStyle(
+                            //     `variables${index}`,
+                            //     errorValues,
+                            // )}
+                            value={settingValues?.bromoKey || ""}
+                            placeholder="Value"
+                            onChange={(event) =>
+                                handleFormChange("bromoKey", event)
+                            }
+                        />
+                        {getErrorMsg(
+                            `bromoKey`,
+                            errorValues,
+                            "A value is required",
+                        )}
+                    </div>
+                    <p className="text-grey-dark text-xs italic mt-1 mb-4 mx-3">
+                        {`OR`}
+                    </p>
+                </div>
+                <div>
+                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
+                        Open AI API Key
+                    </label>
+                    <div
+                        className="appearance-none w-full inline-block mx-3"
+                        style={{
+                            width: "90%",
+                        }}
+                    >
+                        <input
+                            className="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
+                            type="text"
+                            name="openAIKey"
+                            // style={getErrorStyle(
+                            //     `variables${index}`,
+                            //     errorValues,
+                            // )}
+                            value={settingValues?.openAIKey || ""}
+                            placeholder="Value"
+                            onChange={(event) =>
+                                handleFormChange("openAIKey", event)
+                            }
+                        />
+                        {getErrorMsg(
+                            `openAIKey`,
+                            errorValues,
+                            "A value is required",
+                        )}
+                    </div>
+                    <p className="text-grey-dark text-xs italic mt-1 mb-4 mx-3">
+                        {`With`}
+                    </p>
+                </div>
+                <div>
+                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
+                        Open AI Org Id
+                    </label>
+                    <div
+                        className="appearance-none w-full inline-block mx-3"
+                        style={{
+                            width: "90%",
+                        }}
+                    >
+                        <input
+                            className="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
+                            type="text"
+                            name="openAIOrg"
+                            // style={getErrorStyle(
+                            //     `variables${index}`,
+                            //     errorValues,
+                            // )}
+                            value={settingValues?.openAIOrg || ""}
+                            placeholder="Value"
+                            onChange={(event) =>
+                                handleFormChange("openAIOrg", event)
+                            }
+                        />
+                        {getErrorMsg(
+                            `openAIOrg`,
+                            errorValues,
+                            "A value is required",
+                        )}
+                    </div>
+                </div>
+            </div>
+            <div className="w-full px-3 mb-6 md:mb-0 h-22 mt-5 ">
+                Why is org id required?
+                <br />
+                Org id is passed into the open ai api to identify the user
+                account that is using the api. You can find it in the open ai
+                dashboard under settings.
+            </div>
+        </div>
+    );
+};
+
 const PostGenerator = () => {
     const [templates, setTemplates] = React.useState([]);
+    const [selectedTemplate, setSelectedTemplate] = React.useState(null);
 
     const setValues = React.useMemo(() => {
         templates.filter((temp) => {
@@ -161,12 +324,20 @@ const PostGenerator = () => {
     if (loading) {
         return <div>Landing....</div>;
     }
+    console.log(selectedTemplate);
+    if (selectedTemplate) {
+        return <RunTemplate template={selectedTemplate} />;
+    }
+
     return (
         <div>
             {templates.map((template: any, index: number) => {
                 return (
-                    <div className="px-1 my-1" key={index}>
-                        {" "}
+                    <div
+                        className="flex items-center p-4 m-1 text-white bg-blue-500 shadow-xs cursor-pointer hover:bg-blue-600"
+                        key={index}
+                        onClick={() => setSelectedTemplate(template)}
+                    >
                         {template?.name}
                     </div>
                 );

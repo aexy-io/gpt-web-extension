@@ -20,5 +20,11 @@
         "128": "apple-icon-120x120.png"
     },
     "host_permissions": ["https://*/*", "http://*/*"],
-    "permissions": ["tabs", "activeTab", "notifications", "scripting"]
+    "permissions": [
+        "tabs",
+        "activeTab",
+        "notifications",
+        "scripting",
+        "storage"
+    ]
 }

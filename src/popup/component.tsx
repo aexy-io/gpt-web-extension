@@ -4,7 +4,7 @@ import browser, { Tabs } from "webextension-polyfill";
 import { Route } from "react-router-dom";
 import { Scroller } from "@src/components/scroller";
 import css from "./styles.module.css";
-import PostGenerator from "./postGenerator";
+import PostGenerator, { SettingsTab } from "./postGenerator";
 import { GraphQLClient, ClientContext } from "graphql-hooks";
 
 // // // //
@@ -126,7 +126,7 @@ export function Popup() {
                                     setTabState(0);
                                 }}
                             >
-                                Recommended
+                                Popular
                             </button>
                             <button
                                 className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
@@ -138,26 +138,12 @@ export function Popup() {
                                     setTabState(1);
                                 }}
                             >
-                                Popular
-                            </button>
-                            <button
-                                className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
-                                    tabState === 2
-                                        ? "text-blue-500 border-b-2 font-medium border-blue-500"
-                                        : "text-gray-600"
-                                }`}
-                                onClick={() => {
-                                    setTabState(2);
-                                }}
-                            >
-                                Saved
+                                Settings
                             </button>
                         </nav>
                     </div>
-                    {tabState === 0 && popularTab()}
-                    {tabState === 1 && <PostGenerator />}
-                    {tabState === 2 && <span>tab 2</span>}
-                    {tabState === 3 && <span>tab 3</span>}
+                    {tabState === 0 && <PostGenerator />}
+                    {tabState === 1 && <SettingsTab />}
                 </div>
                 {/* <div className="mx-4 my-4">
                 <Hello />
