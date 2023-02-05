@@ -38,6 +38,7 @@ const RunTemplate = (template: any) => {
     }, [template?.metadata?.variables]);
 
     const [errorValues, setErrorValues] = React.useState({});
+    const [result, setResult] = React.useState("The result will appear here");
     const validateForm = () => {
         const errors: any = {};
         setErrorValues(errors);
@@ -113,19 +114,28 @@ const RunTemplate = (template: any) => {
                             const { error, fields, keys } =
                                 await validateSettings();
                             if (error) {
-                                await Browser.notifications.create({
+                                return await Browser.notifications.create({
                                     type: "basic",
                                     iconUrl: "favicon-16x16.png",
                                     title: "Missing Settings",
                                     message: error,
                                 });
-                                return window.alert(error);
                             }
-                            await runPrompt(
+                            const result = await runPrompt(
                                 variables,
                                 template?.template?.id,
                                 keys,
                             );
+                            if (result?.error) {
+                                return await Browser.notifications.create({
+                                    type: "basic",
+                                    iconUrl: "favicon-16x16.png",
+                                    title: "Error Running Prompt",
+                                    message: result?.error,
+                                });
+                            } else {
+                                setResult(result?.data);
+                            }
                         }
                     }}
                 >
@@ -141,6 +151,34 @@ const RunTemplate = (template: any) => {
                     />
                 </div>
             ) : null} */}
+            {result && (
+                <div
+                    onClick={() => {
+                        navigator.clipboard.writeText(result).then(
+                            () => {
+                                Browser.notifications.create({
+                                    type: "basic",
+                                    iconUrl: "favicon-16x16.png",
+                                    title: "Copied Successfully",
+                                    message:
+                                        "Text copied to clipboard successfully",
+                                });
+                            },
+                            () => {
+                                Browser.notifications.create({
+                                    type: "basic",
+                                    iconUrl: "favicon-16x16.png",
+                                    title: "Copy Failed",
+                                    message: "Text copying to clipboard failed",
+                                });
+                                /* clipboard write failed */
+                            },
+                        );
+                    }}
+                >
+                    {result}
+                </div>
+            )}
         </div>
     );
 };

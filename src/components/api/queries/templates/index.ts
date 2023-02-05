@@ -67,10 +67,10 @@ const runPrompt = (variables: any, templatId: any, keys: any) => {
     })
         .then((res) => res.json())
         .then((res) => {
-            return res.data;
+            return { data: res.data, error: null };
         })
         .catch((err) => {
-            console.error(err);
+            return { error: err, data: null };
         });
 };
 
