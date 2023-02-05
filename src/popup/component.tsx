@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Hello } from "@src/components/hello";
 import browser, { Tabs } from "webextension-polyfill";
+import { Route } from "react-router-dom";
 import { Scroller } from "@src/components/scroller";
 import css from "./styles.module.css";
+import PostGenerator from "./postGenerator";
 
 // // // //
 
@@ -54,14 +56,20 @@ const popularTab = () => {
             <div className="mb-6">
                 <ul>
                     <li className="mb-4">
-                        <a
-                            className="flex items-center p-4 text-white bg-blue-500 rounded-xl"
-                            href="#"
-                        >
-                            <span className="ml-4 text-sm font-semibold">
-                                Viral Post Generator
-                            </span>
-                        </a>
+                        <div className="flex items-center p-4 text-white bg-blue-500 rounded-xl">
+                            <a
+                                href="/popup/postGenerator"
+                                // component={PostGenerator}
+                                // onClick={(e) => {
+                                //     e.preventDefault();
+                                //     console.log("print");
+                                // }}
+                            >
+                                <span className="ml-4 text-sm font-semibold">
+                                    Viral Post Generator
+                                </span>
+                            </a>
+                        </div>
                     </li>
 
                     <li className="mb-4">
