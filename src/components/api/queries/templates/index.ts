@@ -1,6 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 // const { GraphQLClient } = require("graphql-hooks");
 
+import { GraphQLClient } from "graphql-hooks";
+
 const getAllPublicTemplatesQuery = `
 query GetAllPublicTemplates {
     templates(condition: { public: true }) {
@@ -23,17 +25,13 @@ query GetAllPublicTemplates {
   }
 `;
 
-// export const getAllPublicTemplates = async (client: GraphQLClient) => {
-//     const res = await client.request({
-//         query: getAllPublicTemplatesQuery,
-//     });
+const getAllPublicTemplates = async (client: GraphQLClient) => {
+    const res = await client.request({
+        query: getAllPublicTemplatesQuery,
+    });
 
-//     // res?.data?.
-//     return res;
-// };
+    // res?.data?.
+    return res;
+};
 
-// module.exports = {
-//     getAllPublicTemplates,
-// };
-
-export { getAllPublicTemplatesQuery };
+export { getAllPublicTemplatesQuery, getAllPublicTemplates };

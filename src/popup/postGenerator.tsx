@@ -1,6 +1,6 @@
 import { useQueryHandler } from "@src/components/api";
 import { getAllPublicTemplatesQuery } from "@src/components/api/queries/templates";
-import { getAllPublicTemplates } from "@src/server/modules/templates";
+import { getAllPublicTemplates } from "@src/components/api/queries/templates";
 import * as React from "react";
 
 const getErrorStyle = (name: string, errorValues: any) => {
