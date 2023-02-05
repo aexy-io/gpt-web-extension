@@ -1,14 +1,13 @@
-
 {
     "manifest_version": 3,
-    "name": "Chrome Extension Starter",
-    "description": "A Chrome Extension starter kit",
+    "name": "Bromo",
+    "description": "Your Personal AI Assistant",
     "version": "1.0.0",
     "action": {
         "default_icon": {
-            "16": "icon-16.png",
-            "48": "icon-48.png",
-            "128": "icon-128.png"
+            "16": "favicon-16x16.png",
+            "48": "android-icon-48x48.png",
+            "128": "apple-icon-120x120.png"
         },
         "default_popup": "popup.html"
     },
@@ -16,11 +15,10 @@
         "service_worker": "js/backgroundPage.js"
     },
     "icons": {
-        "16": "icon-16.png",
-        "48": "icon-48.png",
-        "128": "icon-128.png"
+        "16": "favicon-16x16.png",
+        "48": "android-icon-48x48.png",
+        "128": "apple-icon-120x120.png"
     },
-    "host_permissions": ["https:\/\/*/*"],
+    "host_permissions": ["https://*/*", "http://*/*"],
     "permissions": ["tabs", "activeTab", "notifications", "scripting"]
 }
-

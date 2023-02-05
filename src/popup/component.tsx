@@ -92,7 +92,7 @@ const popularTab = () => {
 const client = new GraphQLClient({
     url: "http://localhost:5678/graphql",
 });
-// client.setHeader("client", `api`);
+client.setHeader("client", `api`);
 
 const token =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwb3N0Z3JhcGhxbCIsInJvbGUiOiJhZXh5X3Zpc2l0b3IiLCJpZCI6IjU5NzdjYTIxLWM2NDUtNGE4My05ZDU3LWI0ZDM0MzE2YTBlOSIsImlhdCI6MTY3NTQ1Mjc3Mn0.7glLY0AMlg0w7w-vQLTzJW1HpNmvZxGoVQDVNC3KacQ";
