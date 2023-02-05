@@ -5,6 +5,7 @@ import { Route } from "react-router-dom";
 import { Scroller } from "@src/components/scroller";
 import css from "./styles.module.css";
 import PostGenerator from "./postGenerator";
+import { GraphQLClient, ClientContext } from "graphql-hooks";
 
 // // // //
 
@@ -88,6 +89,18 @@ const popularTab = () => {
     );
 };
 
+const client = new GraphQLClient({
+    url: "http://localhost:5678/graphql",
+});
+// client.setHeader("client", `api`);
+
+const token =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwb3N0Z3JhcGhxbCIsInJvbGUiOiJhZXh5X3Zpc2l0b3IiLCJpZCI6IjU5NzdjYTIxLWM2NDUtNGE4My05ZDU3LWI0ZDM0MzE2YTBlOSIsImlhdCI6MTY3NTQ1Mjc3Mn0.7glLY0AMlg0w7w-vQLTzJW1HpNmvZxGoVQDVNC3KacQ";
+client.setHeaders({
+    Authorization: `Bearer ${token}`,
+    client: "api",
+});
+
 const baseURL = "http://localhost:5678";
 
 export function Popup() {
@@ -98,54 +111,55 @@ export function Popup() {
     const [tabState, setTabState] = useState(0);
     // Renders the component tree
     return (
-        <div className={css.popupContainer}>
-            <div className="container h-full">
-                <div className="bg-white mb-2">
-                    <nav className="flex flex-row pl-2">
-                        <button
-                            className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
-                                tabState === 0
-                                    ? "text-blue-500 border-b-2 font-medium border-blue-500"
-                                    : "text-gray-600"
-                            }`}
-                            onClick={() => {
-                                setTabState(0);
-                            }}
-                        >
-                            Recommended
-                        </button>
-                        <button
-                            className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
-                                tabState === 1
-                                    ? "text-blue-500 border-b-2 font-medium border-blue-500"
-                                    : "text-gray-600"
-                            }`}
-                            onClick={() => {
-                                setTabState(1);
-                            }}
-                        >
-                            Popular
-                        </button>
-                        <button
-                            className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
-                                tabState === 2
-                                    ? "text-blue-500 border-b-2 font-medium border-blue-500"
-                                    : "text-gray-600"
-                            }`}
-                            onClick={() => {
-                                setTabState(2);
-                            }}
-                        >
-                            Saved
-                        </button>
-                    </nav>
+        <ClientContext.Provider value={client}>
+            <div className={css.popupContainer}>
+                <div className="container h-full">
+                    <div className="bg-white mb-2">
+                        <nav className="flex flex-row pl-2">
+                            <button
+                                className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                    tabState === 0
+                                        ? "text-blue-500 border-b-2 font-medium border-blue-500"
+                                        : "text-gray-600"
+                                }`}
+                                onClick={() => {
+                                    setTabState(0);
+                                }}
+                            >
+                                Recommended
+                            </button>
+                            <button
+                                className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                    tabState === 1
+                                        ? "text-blue-500 border-b-2 font-medium border-blue-500"
+                                        : "text-gray-600"
+                                }`}
+                                onClick={() => {
+                                    setTabState(1);
+                                }}
+                            >
+                                Popular
+                            </button>
+                            <button
+                                className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                    tabState === 2
+                                        ? "text-blue-500 border-b-2 font-medium border-blue-500"
+                                        : "text-gray-600"
+                                }`}
+                                onClick={() => {
+                                    setTabState(2);
+                                }}
+                            >
+                                Saved
+                            </button>
+                        </nav>
+                    </div>
+                    {tabState === 0 && popularTab()}
+                    {tabState === 1 && <PostGenerator />}
+                    {tabState === 2 && <span>tab 2</span>}
+                    {tabState === 3 && <span>tab 3</span>}
                 </div>
-                {tabState === 0 && popularTab()}
-                {tabState === 1 && <span>tab 1</span>}
-                {tabState === 2 && <span>tab 2</span>}
-                {tabState === 3 && <span>tab 3</span>}
-            </div>
-            {/* <div className="mx-4 my-4">
+                {/* <div className="mx-4 my-4">
                 <Hello />
                 <hr />
                 <Scroller
@@ -157,6 +171,7 @@ export function Popup() {
                     }}
                 />
             </div> */}
-        </div>
+            </div>
+        </ClientContext.Provider>
     );
 }

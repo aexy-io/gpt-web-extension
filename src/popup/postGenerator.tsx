@@ -1,7 +1,8 @@
-import { useQueryHandler } from "@src/components/api";
+// import { QueryHandler } from "@src/components/api";
 import { getAllPublicTemplatesQuery } from "@src/components/api/queries/templates";
-import { getAllPublicTemplates } from "@src/components/api/queries/templates";
 import * as React from "react";
+
+import { useQuery } from "graphql-hooks";
 
 const getErrorStyle = (name: string, errorValues: any) => {
     return errorValues && errorValues[name] ? { borderColor: "red" } : null;
@@ -134,10 +135,6 @@ const RunTemplate = (template: any) => {
 };
 
 const PostGenerator = () => {
-    const { data, loading, error } = useQueryHandler(
-        getAllPublicTemplatesQuery,
-        null,
-    );
     const [templates, setTemplates] = React.useState([]);
 
     const setValues = React.useMemo(() => {
@@ -150,14 +147,17 @@ const PostGenerator = () => {
         return;
     }, [templates]);
 
-    React.useEffect(() => {
-        console.log(data);
+    const { loading, error, data } = useQuery(getAllPublicTemplatesQuery, {
+        variables: {},
+    });
+    console.log(loading, error, data);
 
+    React.useEffect(() => {
+        // fetchData();
         if (data?.templates?.nodes) {
             setTemplates(data?.templates?.nodes);
-            setValues;
         }
-    }, [data, setValues, loading]);
+    }, [data]);
     if (loading) {
         return <div>Landing....</div>;
     }
