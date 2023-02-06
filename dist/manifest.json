@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Bromo",
-    "description": "Your Personal AI Assistant",
-    "version": "1.0.0",
+    "name": "Bromo - ChatGPT Assistant for everyone",
+    "description": "Your Personal ChatGPT/OpenGPT based AI Assistant - Start adopting ai in your daily life everywhere in your favourite browser",
+    "version": "0.0.1",
     "action": {
         "default_icon": {
             "16": "favicon-16x16.png",
