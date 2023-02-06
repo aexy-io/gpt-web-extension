@@ -1,5 +1,7 @@
 import Browser from "webextension-polyfill";
 
+export const baseURL = "https://bromo.app";
+
 const getAllPublicTemplatesQuery = `
 query GetAllPublicTemplates {
     templates(condition: { public: true }) {
@@ -53,7 +55,7 @@ const validateSettings = async () => {
 };
 
 const runPrompt = (variables: any, templateId: string, keys: any) => {
-    return fetch("http://localhost:5678/webhook/v1/extension", {
+    return fetch(`${baseURL}/webhook/v1/extension`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

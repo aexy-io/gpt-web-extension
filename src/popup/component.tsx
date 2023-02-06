@@ -1,17 +1,10 @@
 import React, { useState } from "react";
-import { Hello } from "@src/components/hello";
 import browser, { Tabs } from "webextension-polyfill";
-import { Route } from "react-router-dom";
-import { Scroller } from "@src/components/scroller";
 import css from "./styles.module.css";
 import PostGenerator, { SettingsTab } from "./postGenerator";
 import { GraphQLClient, ClientContext } from "graphql-hooks";
-
-// // // //
-
-// Scripts to execute in current tab
-const scrollToTopPosition = 0;
-const scrollToBottomPosition = 9999999;
+import { baseURL } from "@src/components/api/queries/templates";
+import Browser from "webextension-polyfill";
 
 function scrollWindow(position: number) {
     window.scroll(0, position);
@@ -90,23 +83,22 @@ const popularTab = () => {
 };
 
 const client = new GraphQLClient({
-    url: "http://localhost:5678/graphql",
-});
-client.setHeader("client", `api`);
-
-const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwb3N0Z3JhcGhxbCIsInJvbGUiOiJhZXh5X3Zpc2l0b3IiLCJpZCI6IjU5NzdjYTIxLWM2NDUtNGE4My05ZDU3LWI0ZDM0MzE2YTBlOSIsImlhdCI6MTY3NTQ1Mjc3Mn0.7glLY0AMlg0w7w-vQLTzJW1HpNmvZxGoVQDVNC3KacQ";
-client.setHeaders({
-    Authorization: `Bearer ${token}`,
-    client: "api",
+    url: `${baseURL}/graphql`,
 });
 
-const baseURL = "http://localhost:5678";
+client.setHeader("client", "api");
 
 export function Popup() {
     // Sends the `popupMounted` event
+    const setClientHeader = async () => {
+        const bromoKey = await Browser.storage.local.get("bromoKey");
+        if (bromoKey?.bromoKey) {
+            client.setHeader("Authorization", `Bearer ${bromoKey.bromoKey}`);
+        }
+    };
     React.useEffect(() => {
         browser.runtime.sendMessage({ popupMounted: true });
+        setClientHeader();
     }, []);
     const [tabState, setTabState] = useState(0);
     // Renders the component tree
