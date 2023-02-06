@@ -92,7 +92,8 @@ export function Popup() {
     // Sends the `popupMounted` event
     const setClientHeader = async () => {
         const bromoKey = await Browser.storage.local.get("bromoKey");
-        if (bromoKey?.bromoKey) {
+
+        if (bromoKey?.bromoKey?.trim()) {
             client.setHeader("Authorization", `Bearer ${bromoKey.bromoKey}`);
         }
     };
