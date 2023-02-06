@@ -153,6 +153,7 @@ const RunTemplate = (template: any) => {
             ) : null} */}
             {result && (
                 <div
+                    className="w-full px-1 bg-white rounded-md text-md"
                     onClick={() => {
                         navigator.clipboard.writeText(result).then(
                             () => {

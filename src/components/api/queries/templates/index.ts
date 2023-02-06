@@ -52,7 +52,7 @@ const validateSettings = async () => {
     };
 };
 
-const runPrompt = (variables: any, templatId: any, keys: any) => {
+const runPrompt = (variables: any, templateId: string, keys: any) => {
     return fetch("http://localhost:5678/webhook/v1/extension", {
         method: "POST",
         headers: {
@@ -60,14 +60,14 @@ const runPrompt = (variables: any, templatId: any, keys: any) => {
         },
         body: JSON.stringify({
             variables,
-            templatId,
+            templateId,
             ...keys,
             type: "openai",
         }),
     })
         .then((res) => res.json())
         .then((res) => {
-            return { data: res.data, error: null };
+            return { data: res.data, error: res.error };
         })
         .catch((err) => {
             return { error: err, data: null };
