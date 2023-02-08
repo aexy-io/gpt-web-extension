@@ -210,7 +210,18 @@ export const SettingsTab = () => {
     }, []);
 
     const handleFormChange = (name: string, event: any) => {
-        if (event.target.value) {
+        console.log(name, event);
+        if (name === "modelName") {
+            const errors: any = { ...errorValues };
+            delete errors[name];
+            setSettingValues(
+                Object.assign({}, settingValues, {
+                    [name]: event,
+                }),
+            );
+            Browser.storage.local.set({ [name]: event });
+        }
+        if (event?.target?.value) {
             const errors: any = { ...errorValues };
             delete errors[name];
             setSettingValues(

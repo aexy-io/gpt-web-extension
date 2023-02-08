@@ -45,39 +45,18 @@ const CustomTemplate = () => {
         console.log("inside effect");
 
         setTimeout(async () => {
-            inputRef?.current?.focus();
-            // document.execCommand("paste");
-            // const copyText = await Browser.storage.local.get("copyText");
-            console.log(window, "window");
             setClipText(window.copyText);
-        }, 1000);
+            inputData["supplimentaryInstruction"] = window.copyText;
+        }, 300);
     }, [window.copyText]);
 
     const handleFormChange = (index: string, event: any) => {
-        setInputData({ ...inputData, ...{ index: event.target.value } });
+        setInputData({ ...inputData, ...{ [index]: event.target.value } });
     };
     return (
         <div>
             <div className="w-full px-3 mb-6 md:mb-0 h-22 mt-5 ">
                 <div>
-                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
-                        Instruction
-                    </label>
-                    <div className="appearance-none w-full inline-block px-2">
-                        <input
-                            className="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
-                            type="text"
-                            name="value"
-                            // style={getErrorStyle(
-                            //     `variables${index}`,
-                            //     errorValues,
-                            // )}
-                            placeholder="Value"
-                            onChange={(event) =>
-                                handleFormChange("instruction", event)
-                            }
-                        />
-                    </div>
                     <div className="mb-3 px-2 ">
                         <label className="form-label inline-block mb-2 text-gray-700">
                             Context:
@@ -89,10 +68,28 @@ const CustomTemplate = () => {
                             id="copiedArea"
                             placeholder="Copied Text Appears Here"
                             value={clipText}
-                            onChange={(event) =>
-                                handleFormChange("clip", event)
-                            }
+                            onChange={(event) => {
+                                setClipText(event.target.value);
+                                handleFormChange(
+                                    "supplimentaryInstruction",
+                                    event,
+                                );
+                            }}
                         ></textarea>
+                    </div>
+                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
+                        Instruction
+                    </label>
+                    <div className="appearance-none w-full inline-block px-2">
+                        <input
+                            className="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
+                            type="text"
+                            name="value"
+                            placeholder="Ex: Create a summary of the text above"
+                            onChange={(event) => {
+                                handleFormChange("instruction", event);
+                            }}
+                        />
                     </div>
                 </div>
             </div>

@@ -95,7 +95,7 @@ const runCustomPrompt = async (variables: any) => {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            variables,
+            ...variables,
             ...keys,
             type: "openai",
         }),
