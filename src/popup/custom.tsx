@@ -1,6 +1,7 @@
 // import { QueryHandler } from "@src/components/api";
 import {
     getAllPublicTemplatesQuery,
+    runCustomPrompt,
     runPrompt,
     validateSettings,
 } from "@src/components/api/queries/templates";
@@ -27,6 +28,7 @@ const CustomTemplate = () => {
     const [clipText, setClipText] = useState("");
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const [result, setResult] = useState("The result will appear here");
+    const [inputData, setInputData] = useState<{ [key: string]: string }>({});
 
     const validateForm = () => {
         const errors: any = {};
@@ -52,8 +54,7 @@ const CustomTemplate = () => {
     }, [window.copyText]);
 
     const handleFormChange = (index: string, event: any) => {
-        const data: { [key: string]: string } = {};
-        data[index] = event.target.value;
+        setInputData({ ...inputData, ...{ index: event.target.value } });
     };
     return (
         <div>
@@ -79,11 +80,11 @@ const CustomTemplate = () => {
                     </div>
                     <div className="mb-3 px-2 ">
                         <label className="form-label inline-block mb-2 text-gray-700">
-                            Your Copied is Copied below:
+                            Context:
                         </label>
                         <textarea
                             ref={inputRef}
-                            className="form-control block w-full py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                            className="form-control block w-full py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none "
                             rows={3}
                             id="copiedArea"
                             placeholder="Copied Text Appears Here"
@@ -102,30 +103,30 @@ const CustomTemplate = () => {
                         e.preventDefault();
                         if (validateForm()) {
                             console.log("running prompt");
-                            const { error, fields, keys } =
-                                await validateSettings();
-                            if (error) {
+
+                            if (
+                                inputData["instruction"] === "" ||
+                                inputData["clip"] === ""
+                            ) {
                                 return await Browser.notifications.create({
                                     type: "basic",
                                     iconUrl: "favicon-16x16.png",
-                                    title: "Missing Settings",
-                                    message: error,
+                                    title: "Missing Input",
+                                    message: "Kindly Fill All Fields",
                                 });
                             }
-                            // const result = await runPrompt(
-                            //     variables,
-                            //     keys,
-                            // );
-                            // if (result?.error) {
-                            //     return await Browser.notifications.create({
-                            //         type: "basic",
-                            //         iconUrl: "favicon-16x16.png",
-                            //         title: "Error Running Prompt",
-                            //         message: result?.error,
-                            //     });
-                            // } else {
-                            //     setResult(result?.data);
-                            // }
+                            const result = await runCustomPrompt(inputData);
+                            if (result?.error) {
+                                console.log(result?.error);
+                                return await Browser.notifications.create({
+                                    type: "basic",
+                                    iconUrl: "favicon-16x16.png",
+                                    title: "Error Running Prompt",
+                                    message: result?.error,
+                                });
+                            } else {
+                                setResult(result?.data);
+                            }
                         }
                     }}
                 >
@@ -168,7 +169,6 @@ const CustomTemplate = () => {
                     }}
                 >
                     {result}
-                    {clipText}
                 </div>
             )}
         </div>

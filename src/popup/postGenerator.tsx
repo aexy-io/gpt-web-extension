@@ -8,6 +8,7 @@ import * as React from "react";
 
 import { useQuery } from "graphql-hooks";
 import Browser from "webextension-polyfill";
+import { modelNames } from "@src/components/api/misc";
 
 const getErrorStyle = (name: string, errorValues: any) => {
     return errorValues && errorValues[name] ? { borderColor: "red" } : null;
@@ -224,6 +225,25 @@ export const SettingsTab = () => {
     return (
         <div>
             <div className="w-full px-3 mb-6 md:mb-0 h-22 mt-5 ">
+                <div>
+                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
+                        Choose AI Model
+                    </label>
+                    <select
+                        className="block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded"
+                        onChange={(e) => {
+                            handleFormChange("modelName", e.target.value);
+                        }}
+                    >
+                        {modelNames.map((model) => {
+                            return (
+                                <option key={model.name} value={model.name}>
+                                    {model.label}
+                                </option>
+                            );
+                        })}
+                    </select>{" "}
+                </div>
                 <div>
                     <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
                         Bromo API Key
