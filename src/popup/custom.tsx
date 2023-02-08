@@ -141,7 +141,7 @@ const CustomTemplate = () => {
             ) : null} */}
             {result && (
                 <div
-                    className="w-full px-1 bg-white rounded-md text-md"
+                    className=" mx-3 p-1 bg-white rounded-md text-md"
                     onClick={() => {
                         navigator.clipboard.writeText(result).then(
                             () => {

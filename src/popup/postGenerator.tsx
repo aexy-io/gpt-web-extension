@@ -8,7 +8,8 @@ import * as React from "react";
 
 import { useQuery } from "graphql-hooks";
 import Browser from "webextension-polyfill";
-import { modelNames } from "@src/components/api/misc";
+import { gptInputs, modelNames } from "@src/components/api/misc";
+import ReactSlider from "react-slider";
 
 const getErrorStyle = (name: string, errorValues: any) => {
     return errorValues && errorValues[name] ? { borderColor: "red" } : null;
@@ -187,11 +188,9 @@ const RunTemplate = (template: any) => {
 
 export const SettingsTab = () => {
     const [errorValues, setErrorValues] = React.useState({});
-    const [settingValues, setSettingValues] = React.useState({
-        bromoKey: "",
-        openAIKey: "",
-        openAIOrg: "",
-    });
+    const [settingValues, setSettingValues] = React.useState<{
+        [key: string]: any;
+    }>({});
 
     const getSettingValues = async () => {
         const bromoKey = await Browser.storage.local.get("bromoKey");
@@ -237,11 +236,11 @@ export const SettingsTab = () => {
         <div>
             <div className="w-full px-3 mb-6 md:mb-0 h-22 mt-5 ">
                 <div>
-                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
+                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mb-1">
                         Choose AI Model
                     </label>
                     <select
-                        className="block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded"
+                        className="block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded  mb-4"
                         onChange={(e) => {
                             handleFormChange("modelName", e.target.value);
                         }}
@@ -256,13 +255,13 @@ export const SettingsTab = () => {
                     </select>{" "}
                 </div>
                 <div>
-                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
+                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mb-1">
                         Bromo API Key
                     </label>
                     <div
-                        className="appearance-none w-full inline-block mx-3"
+                        className="appearance-none w-full inline-block"
                         style={{
-                            width: "90%",
+                            width: "100%",
                         }}
                     >
                         <input
@@ -289,79 +288,131 @@ export const SettingsTab = () => {
                         {`OR`}
                     </p>
                 </div>
-                <div>
-                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
-                        Open AI API Key
-                    </label>
-                    <div
-                        className="appearance-none w-full inline-block mx-3"
-                        style={{
-                            width: "90%",
-                        }}
-                    >
-                        <input
-                            className="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
-                            type="text"
-                            name="openAIKey"
-                            // style={getErrorStyle(
-                            //     `variables${index}`,
-                            //     errorValues,
-                            // )}
-                            value={settingValues?.openAIKey || ""}
-                            placeholder="Value"
-                            onChange={(event) =>
-                                handleFormChange("openAIKey", event)
-                            }
-                        />
-                        {getErrorMsg(
-                            `openAIKey`,
-                            errorValues,
-                            "A value is required",
-                        )}
-                    </div>
-                    <p className="text-grey-dark text-xs italic mt-1 mb-4 mx-3">
-                        {`With`}
-                    </p>
-                </div>
-                <div>
-                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
-                        Open AI Org Id
-                    </label>
-                    <div
-                        className="appearance-none w-full inline-block mx-3"
-                        style={{
-                            width: "90%",
-                        }}
-                    >
-                        <input
-                            className="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
-                            type="text"
-                            name="openAIOrg"
-                            // style={getErrorStyle(
-                            //     `variables${index}`,
-                            //     errorValues,
-                            // )}
-                            value={settingValues?.openAIOrg || ""}
-                            placeholder="Value"
-                            onChange={(event) =>
-                                handleFormChange("openAIOrg", event)
-                            }
-                        />
-                        {getErrorMsg(
-                            `openAIOrg`,
-                            errorValues,
-                            "A value is required",
-                        )}
-                    </div>
-                </div>
             </div>
-            <div className="w-full px-3 mb-6 md:mb-0 h-22 mt-5 ">
-                Why is org id required?
-                <br />
-                Org id is passed into the open ai api to identify the user
-                account that is using the api. You can find it in the open ai
-                dashboard under settings.
-            </div>
+
+            {gptInputs.map((input) => {
+                switch (input.type) {
+                    case "string":
+                        return (
+                            <div className="md:w-1/2 px-3 mb-6 md:mb-0 h-22 mt-5 ">
+                                <label
+                                    className="block uppercase tracking-wide text-grey-darker text-xs font-bold mb-2"
+                                    htmlFor="grid-city"
+                                >
+                                    {input.label}
+                                </label>
+                                <input
+                                    className="appearance-none block w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
+                                    id="grid-city"
+                                    type="text"
+                                    name={input.name}
+                                    placeholder={input.placeholder}
+                                    value={settingValues[input.name]}
+                                    // style={
+                                    //     (input?.required &&
+                                    //         getErrorStyle(
+                                    //             input.name,
+                                    //             errorValues,
+                                    //         )) ||
+                                    //     ""
+                                    // }
+                                    onChange={(e) => {
+                                        handleFormChange(
+                                            input.name,
+                                            e.target.value,
+                                        );
+                                    }}
+                                />
+                                {input.required &&
+                                    getErrorMsg(
+                                        input.name,
+                                        errorValues,
+                                        input.error,
+                                    )}
+                                <p className="text-grey-dark text-xs italic my-1 py-2">
+                                    {input.description}
+                                </p>
+                            </div>
+                        );
+                    case "number":
+                        return (
+                            <div className="md:w-1/2 px-3 mt-5 h-22">
+                                <label
+                                    className="block uppercase tracking-wide text-grey-darker text-xs font-bold mb-2"
+                                    htmlFor="grid-zip"
+                                >
+                                    {input.label}
+                                </label>
+                                <div className="pt-3">
+                                    <ReactSlider
+                                        className="horizontal-slider"
+                                        thumbClassName="slider-thumb"
+                                        trackClassName="slider-track"
+                                        min={input.min}
+                                        max={input.max}
+                                        step={input.step}
+                                        value={settingValues[input.name]}
+                                        onChange={(e: any) => {
+                                            handleFormChange(input.name, e);
+                                        }}
+                                        renderThumb={(
+                                            props: any,
+                                            state: any,
+                                        ) => (
+                                            <div {...props}>{state.value}</div>
+                                        )}
+                                    />
+                                    <p className="text-grey-dark text-xs italic my-5 py-5">
+                                        {input.description}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+
+                    case "boolean":
+                        return (
+                            <div className="md:w-1/2 px-3 h-22  mt-5 ">
+                                <label
+                                    className="block uppercase tracking-wide text-grey-darker text-xs font-bold mb-2"
+                                    htmlFor="grid-state"
+                                >
+                                    {input.label}
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        className="block appearance-none w-full bg-grey-lighter border border-grey-lighter text-grey-darker py-3 px-4 pr-8 rounded"
+                                        id="grid-state"
+                                        value={settingValues[input.name]}
+                                        onChange={(e) => {
+                                            handleFormChange(
+                                                input.name,
+                                                e.target.value,
+                                            );
+                                        }}
+                                    >
+                                        <option value={"true"}>True</option>
+                                        <option value={"false"}>False</option>
+                                    </select>
+                                    <div className="pointer-events-none absolute pin-y pin-r flex items-center px-2 text-grey-darker">
+                                        <svg
+                                            className="h-4 w-4"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 20 20"
+                                        >
+                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-grey-dark text-xs italic">
+                                        {input.description}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+
+                    default:
+                        break;
+                }
+            })}
         </div>
     );
 };
