@@ -5,6 +5,13 @@ import PostGenerator, { SettingsTab } from "./postGenerator";
 import { GraphQLClient, ClientContext } from "graphql-hooks";
 import { baseURL } from "@src/components/api/queries/templates";
 import Browser from "webextension-polyfill";
+import CustomTemplate from "./custom";
+
+declare global {
+    interface Window {
+        copyText: string;
+    }
+}
 
 function scrollWindow(position: number) {
     window.scroll(0, position);
@@ -110,7 +117,7 @@ export function Popup() {
                     <div className="bg-white mb-2">
                         <nav className="flex flex-row pl-2">
                             <button
-                                className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                className={`py-4 px-6 block hover:text-blue-500 focus:outline-none ${
                                     tabState === 0
                                         ? "text-blue-500 border-b-2 font-medium border-blue-500"
                                         : "text-gray-600"
@@ -119,10 +126,10 @@ export function Popup() {
                                     setTabState(0);
                                 }}
                             >
-                                Popular
+                                Custom
                             </button>
                             <button
-                                className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                className={`py-4 px-6 block hover:text-blue-500 focus:outline-none ${
                                     tabState === 1
                                         ? "text-blue-500 border-b-2 font-medium border-blue-500"
                                         : "text-gray-600"
@@ -131,12 +138,25 @@ export function Popup() {
                                     setTabState(1);
                                 }}
                             >
+                                Popular
+                            </button>
+                            <button
+                                className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                    tabState === 2
+                                        ? "text-blue-500 border-b-2 font-medium border-blue-500"
+                                        : "text-gray-600"
+                                }`}
+                                onClick={() => {
+                                    setTabState(2);
+                                }}
+                            >
                                 Settings
                             </button>
                         </nav>
                     </div>
-                    {tabState === 0 && <PostGenerator />}
-                    {tabState === 1 && <SettingsTab />}
+                    {tabState === 0 && <CustomTemplate />}
+                    {tabState === 1 && <PostGenerator />}
+                    {tabState === 2 && <SettingsTab />}
                 </div>
                 {/* <div className="mx-4 my-4">
                 <Hello />
