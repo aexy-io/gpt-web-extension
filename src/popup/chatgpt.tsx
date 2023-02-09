@@ -25,7 +25,6 @@ const getErrorMsg = (name: string, errorValues: any, error?: string) => {
 
 const CustomTemplate = () => {
     const [errorValues, setErrorValues] = useState({});
-    const [clipText, setClipText] = useState("");
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const [result, setResult] = useState("The result will appear here");
     const [inputData, setInputData] = useState<{ [key: string]: string }>({});
@@ -42,16 +41,36 @@ const CustomTemplate = () => {
     };
 
     React.useEffect(() => {
-        console.log("inside effect");
-
         setTimeout(async () => {
-            setClipText(window.copyText);
+            const chatgptPrompt = `You are GPT-3. Today is October 16, 2022. Answer the following questions. ‘
+            If you can answer directly, use this format:
+            
+            Question: \${Question}
+            Answer: \${Answer}
+            
+            You are unable to directly answer any question that requires:
+            - Analyzing text as a sequence of characters (e.g., counting length, reversing strings)
+            - Counting of more than several items (e.g., words in a sentence or items in a list)
+            - Arithmetic that a human could not perform easily in their head
+            
+            In these cases, consult IPython. Use this format:
+            
+            Question: \${Question}
+            IPython session:
+            
+            \${IPython commands and output needed to find answer}
+            Answer: S{Answer}
+            
+            Your training data was last updated April 2021, and you do not know any later events. Consult Wikipedia
+            using the ‘wikipedia’ package for any question whose answer may have changed since then.
+            
+            Begin.`;
             setInputData({
                 ...inputData,
-                ...{ supplimentaryInstruction: window.copyText },
+                ...{ supplimentaryInstruction: chatgptPrompt },
             });
         }, 300);
-    }, [window.copyText]);
+    }, []);
 
     const handleFormChange = (index: string, event: any) => {
         setInputData({ ...inputData, ...{ [index]: event.target.value } });
@@ -62,37 +81,19 @@ const CustomTemplate = () => {
                 <div>
                     <div className="mb-3 px-2 ">
                         <label className="form-label inline-block mb-2 text-gray-700">
-                            Context:
+                            Ask ChatGPT:
                         </label>
                         <textarea
                             ref={inputRef}
                             className="form-control block w-full py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none "
                             rows={3}
                             id="copiedArea"
-                            placeholder="Copied Text Appears Here"
-                            value={clipText}
-                            onChange={(event) => {
-                                setClipText(event.target.value);
-                                handleFormChange(
-                                    "supplimentaryInstruction",
-                                    event,
-                                );
-                            }}
-                        ></textarea>
-                    </div>
-                    <label className="uppercase block tracking-wide text-grey-darker text-xs font-bold mx-3 mb-1">
-                        Instruction
-                    </label>
-                    <div className="appearance-none w-full inline-block px-2">
-                        <input
-                            className="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4"
-                            type="text"
-                            name="value"
-                            placeholder="Ex: Create a summary of the text above"
+                            placeholder=""
+                            value={inputData["instruction"]}
                             onChange={(event) => {
                                 handleFormChange("instruction", event);
                             }}
-                        />
+                        ></textarea>
                     </div>
                 </div>
             </div>
@@ -102,12 +103,7 @@ const CustomTemplate = () => {
                     onClick={async (e) => {
                         e.preventDefault();
                         if (validateForm()) {
-                            console.log("running prompt");
-
-                            if (
-                                inputData["instruction"] === "" ||
-                                inputData["supplimentaryInstruction"] === ""
-                            ) {
+                            if (inputData["instruction"] === "") {
                                 return await Browser.notifications.create({
                                     type: "basic",
                                     iconUrl: "favicon-16x16.png",

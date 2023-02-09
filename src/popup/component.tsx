@@ -6,6 +6,7 @@ import { GraphQLClient, ClientContext } from "graphql-hooks";
 import { baseURL } from "@src/components/api/queries/templates";
 import Browser from "webextension-polyfill";
 import CustomTemplate from "./custom";
+import ChatGPTTemplate from "./chatgpt";
 
 declare global {
     interface Window {
@@ -126,7 +127,7 @@ export function Popup() {
                                     setTabState(0);
                                 }}
                             >
-                                Custom
+                                ChatGPT
                             </button>
                             <button
                                 className={`py-4 px-6 block hover:text-blue-500 focus:outline-none ${
@@ -138,10 +139,10 @@ export function Popup() {
                                     setTabState(1);
                                 }}
                             >
-                                Popular
+                                Custom
                             </button>
                             <button
-                                className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                className={`py-4 px-6 block hover:text-blue-500 focus:outline-none ${
                                     tabState === 2
                                         ? "text-blue-500 border-b-2 font-medium border-blue-500"
                                         : "text-gray-600"
@@ -150,13 +151,26 @@ export function Popup() {
                                     setTabState(2);
                                 }}
                             >
+                                Popular Prompts
+                            </button>
+                            <button
+                                className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                    tabState === 3
+                                        ? "text-blue-500 border-b-2 font-medium border-blue-500"
+                                        : "text-gray-600"
+                                }`}
+                                onClick={() => {
+                                    setTabState(3);
+                                }}
+                            >
                                 Settings
                             </button>
                         </nav>
                     </div>
-                    {tabState === 0 && <CustomTemplate />}
-                    {tabState === 1 && <PostGenerator />}
-                    {tabState === 2 && <SettingsTab />}
+                    {tabState === 0 && <ChatGPTTemplate />}
+                    {tabState === 1 && <CustomTemplate />}
+                    {tabState === 2 && <PostGenerator />}
+                    {tabState === 3 && <SettingsTab />}
                 </div>
                 {/* <div className="mx-4 my-4">
                 <Hello />
