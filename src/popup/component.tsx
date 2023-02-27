@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { Hello } from "@src/components/hello";
 import browser, { Tabs } from "webextension-polyfill";
-import { Scroller } from "@src/components/scroller";
 import css from "./styles.module.css";
+import PostGenerator, { SettingsTab } from "./postGenerator";
+import { GraphQLClient, ClientContext } from "graphql-hooks";
+import { baseURL } from "@src/components/api/queries/templates";
+import Browser from "webextension-polyfill";
+import CustomTemplate from "./custom";
+import ChatGPTTemplate from "./chatgpt";
 
-// // // //
-
-// Scripts to execute in current tab
-const scrollToTopPosition = 0;
-const scrollToBottomPosition = 9999999;
+declare global {
+    interface Window {
+        copyText: string;
+    }
+}
 
 function scrollWindow(position: number) {
     window.scroll(0, position);
@@ -54,14 +58,20 @@ const popularTab = () => {
             <div className="mb-6">
                 <ul>
                     <li className="mb-4">
-                        <a
-                            className="flex items-center p-4 text-white bg-blue-500 rounded-xl"
-                            href="#"
-                        >
-                            <span className="ml-4 text-sm font-semibold">
-                                Viral Post Generator
-                            </span>
-                        </a>
+                        <div className="flex items-center p-4 text-white bg-blue-500 rounded-xl">
+                            <a
+                                href="/popup/postGenerator"
+                                // component={PostGenerator}
+                                // onClick={(e) => {
+                                //     e.preventDefault();
+                                //     console.log("print");
+                                // }}
+                            >
+                                <span className="ml-4 text-sm font-semibold">
+                                    Viral Post Generator
+                                </span>
+                            </a>
+                        </div>
                     </li>
 
                     <li className="mb-4">
@@ -80,64 +90,89 @@ const popularTab = () => {
     );
 };
 
-const baseURL = "http://localhost:5678";
+const client = new GraphQLClient({
+    url: `${baseURL}/graphql`,
+});
+
+client.setHeader("client", "api");
 
 export function Popup() {
     // Sends the `popupMounted` event
+    const setClientHeader = async () => {
+        const bromoKey = await Browser.storage.local.get("bromoKey");
+
+        if (bromoKey?.bromoKey?.trim()) {
+            client.setHeader("Authorization", `Bearer ${bromoKey.bromoKey}`);
+        }
+    };
     React.useEffect(() => {
         browser.runtime.sendMessage({ popupMounted: true });
+        setClientHeader();
     }, []);
     const [tabState, setTabState] = useState(0);
     // Renders the component tree
     return (
-        <div className={css.popupContainer}>
-            <div className="container h-full">
-                <div className="bg-white mb-2">
-                    <nav className="flex flex-row pl-2">
-                        <button
-                            className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
-                                tabState === 0
-                                    ? "text-blue-500 border-b-2 font-medium border-blue-500"
-                                    : "text-gray-600"
-                            }`}
-                            onClick={() => {
-                                setTabState(0);
-                            }}
-                        >
-                            Recommended
-                        </button>
-                        <button
-                            className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
-                                tabState === 1
-                                    ? "text-blue-500 border-b-2 font-medium border-blue-500"
-                                    : "text-gray-600"
-                            }`}
-                            onClick={() => {
-                                setTabState(1);
-                            }}
-                        >
-                            Popular
-                        </button>
-                        <button
-                            className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
-                                tabState === 2
-                                    ? "text-blue-500 border-b-2 font-medium border-blue-500"
-                                    : "text-gray-600"
-                            }`}
-                            onClick={() => {
-                                setTabState(2);
-                            }}
-                        >
-                            Saved
-                        </button>
-                    </nav>
+        <ClientContext.Provider value={client}>
+            <div className={css.popupContainer}>
+                <div className="container h-full">
+                    <div className="bg-white mb-2">
+                        <nav className="flex flex-row pl-2">
+                            <button
+                                className={`py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                    tabState === 0
+                                        ? "text-blue-500 border-b-2 font-medium border-blue-500"
+                                        : "text-gray-600"
+                                }`}
+                                onClick={() => {
+                                    setTabState(0);
+                                }}
+                            >
+                                ChatGPT
+                            </button>
+                            <button
+                                className={`py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                    tabState === 1
+                                        ? "text-blue-500 border-b-2 font-medium border-blue-500"
+                                        : "text-gray-600"
+                                }`}
+                                onClick={() => {
+                                    setTabState(1);
+                                }}
+                            >
+                                Custom
+                            </button>
+                            <button
+                                className={`py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                    tabState === 2
+                                        ? "text-blue-500 border-b-2 font-medium border-blue-500"
+                                        : "text-gray-600"
+                                }`}
+                                onClick={() => {
+                                    setTabState(2);
+                                }}
+                            >
+                                Popular Prompts
+                            </button>
+                            <button
+                                className={` py-4 px-6 block hover:text-blue-500 focus:outline-none ${
+                                    tabState === 3
+                                        ? "text-blue-500 border-b-2 font-medium border-blue-500"
+                                        : "text-gray-600"
+                                }`}
+                                onClick={() => {
+                                    setTabState(3);
+                                }}
+                            >
+                                Settings
+                            </button>
+                        </nav>
+                    </div>
+                    {tabState === 0 && <ChatGPTTemplate />}
+                    {tabState === 1 && <CustomTemplate />}
+                    {tabState === 2 && <PostGenerator />}
+                    {tabState === 3 && <SettingsTab />}
                 </div>
-                {tabState === 0 && popularTab()}
-                {tabState === 1 && <span>tab 1</span>}
-                {tabState === 2 && <span>tab 2</span>}
-                {tabState === 3 && <span>tab 3</span>}
-            </div>
-            {/* <div className="mx-4 my-4">
+                {/* <div className="mx-4 my-4">
                 <Hello />
                 <hr />
                 <Scroller
@@ -149,6 +184,7 @@ export function Popup() {
                     }}
                 />
             </div> */}
-        </div>
+            </div>
+        </ClientContext.Provider>
     );
 }
